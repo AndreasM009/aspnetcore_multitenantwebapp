@@ -1,0 +1,13 @@
+@page
+@model SignedOutModel
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<h2>@ViewData["Title"]</h2>
+@*<p>
+    You have successfully signed out.
+</p>*@
+<p>
+    <button asp-controller="Account" asp-action="OnBoarding" title="OnBoard">OnBoarding</button>
+</p>
