@@ -13,7 +13,7 @@ namespace WebApp.Pages
         {
             if (!User.Identity.IsAuthenticated)
             {
-                return RedirectToPage("/Account/SignedOut");
+                return RedirectToPage("/Account/Welcome");
             }
 
             return Page();

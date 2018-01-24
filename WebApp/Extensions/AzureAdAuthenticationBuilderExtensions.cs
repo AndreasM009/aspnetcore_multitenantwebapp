@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -19,6 +19,16 @@ namespace Microsoft.AspNetCore.Authentication
             builder.Services.Configure(configureOptions);
             builder.Services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, ConfigureAzureOptions>();
             builder.AddOpenIdConnect();
+            return builder;
+        }
+
+        public static AuthenticationBuilder AddSessionCookie(this AuthenticationBuilder builder)
+        {
+            builder.AddCookie(options =>
+            {
+                options.SessionStore = new MemoryCacheTicketStore();
+            });
+
             return builder;
         }
 
@@ -38,24 +48,19 @@ namespace Microsoft.AspNetCore.Authentication
                 options.UseTokenLifetime = true;
                 options.CallbackPath = _azureOptions.CallbackPath;
                 options.RequireHttpsMetadata = false;
+                options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     // Instead of using the default validation (validating against a single issuer value, as we do in
                     // line of business apps), we inject our own multitenant validation logic
-                    ValidateIssuer = false,
-
-                    // If the app is meant to be accessed by entire organizations, add your issuer validation logic here.
-                    //IssuerValidator = (issuer, securityToken, validationParameters) => {
-                    //    if (myIssuerValidationLogic(issuer)) return issuer;
-                    //}
+                    ValidateIssuer = false                    
                 };
 
                 options.Events = new OpenIdConnectEvents
                 {
                     OnTicketReceived = context =>
                     {
-                        // If your authentication logic is based on users then add your logic here
                         return Task.CompletedTask;
                     },
                     OnAuthenticationFailed = context =>
@@ -64,11 +69,17 @@ namespace Microsoft.AspNetCore.Authentication
                         context.HandleResponse(); // Suppress the exception
                         return Task.CompletedTask;
                     },
-                    // If your application needs to do authenticate single users, add your user validation below.
-                    //OnTokenValidated = context =>
-                    //{
-                    //    return myUserValidationLogic(context.Ticket.Principal);
-                    //}
+                    OnAuthorizationCodeReceived = async context =>
+                    {
+                        // Acquire a Token for the Graph API and cache it using ADAL.  In the TodoListController, we'll use the cache to acquire a token to the Todo List API
+                        string userId = (context.Principal.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier"))?.Value;
+                        var clientCredentials = new ClientCredential(_azureOptions.ClientId, _azureOptions.ClientSecret);
+                        var authContext = new AuthenticationContext("https://login.microsoftonline.com/common/", new MemoryTokenCache(userId));
+                        var authResult = await authContext.AcquireTokenByAuthorizationCodeAsync(context.ProtocolMessage.Code, new Uri($"{context.Request.Scheme}://{context.Request.Host}/signin-oidc"), clientCredentials, _azureOptions.GraphApiUri);
+
+                        // Notify the OIDC middleware that we already took care of code redemption.
+                        context.HandleCodeRedemption(context.ProtocolMessage);
+                    }
                 };
             }
 

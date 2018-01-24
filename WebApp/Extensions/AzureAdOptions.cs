@@ -13,5 +13,9 @@
         public string TenantId { get; set; }
         
         public string CallbackPath { get; set; }
+
+        public string GraphApiUri { get; set; }
+
+        public string SignUpRequestUri { get; set; }
     }
 }
