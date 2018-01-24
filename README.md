@@ -5,8 +5,8 @@ The WebApp starts with a Welcome Page that allows the user either to signin or t
 
 # Setup 
 The Application can be setup using the Powershellscript 'Deploy-Application.ps1'. The script registers both Applications in your AAD Tenant as Multi-Tenant Application. The script needs only two parameters:
-    * WebAppName, the name of the Web-Application in your AAD Tenant
-    * WebAppUri, the Uri of the Web-Application e.g.: "https://ad-tenant/web-app-name"
+- WebAppName, the name of the Web-Application in your AAD Tenant
+- WebAppUri, the Uri of the Web-Application e.g.: "https://ad-tenant/web-app-name"
 
 The script returns an object that contains the Application's ClientId an ClientSecret.
 You have to put these values in the appsettings.json file of the Web-Application.
