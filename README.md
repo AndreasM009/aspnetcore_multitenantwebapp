@@ -4,12 +4,14 @@ Both applications are secured by Azure Active Directory.
 The WebApp starts with a Welcome Page that allows the user either to signin or to signup and onboard the Application in his AAD Tenant.
 
 # Setup 
-The Application can be setup using the Powershellscript 'Deploy-Application.ps1'. The script registers both Applications in your AAD Tenant as Multi-Tenant Application. The script needs only two parameters:
+The Application can be setup using the Powershellscript 'Deploy-Application.ps1'. The script registers both Applications in your AAD Tenant as Multi-Tenant Application. The script needs only four parameters:
 - WebAppName, the name of the Web-Application in your AAD Tenant
 - WebAppUri, the Uri of the Web-Application e.g.: "https://ad-tenant/web-app-name"
+- WebApiName, the name of the Web-Api in your AAD Tenant
+- WebApiUri, the Uri of the Web-Api e.g.: "https://ad-tenant/web-api-name"
 
-The script returns an object that contains the Application's ClientId an ClientSecret.
-You have to put these values in the appsettings.json file of the Web-Application.
+The script returns an object that contains the Application's ClientIds, ClientSecrets and the WebApi Uri.
+You have to put these values in the appsettings.json file of the Web-Application and Web-Api.
 
 # OnBoarding
 After calling the script you can use another AAD Tenant to test the OnBoarding process. 
@@ -29,4 +31,7 @@ The Web Application uses IIS Express on port 44377
 Not supported at the moment.
 
 # Removing the Application in your AAD Tenant
-To remove the Application from your AAD Tenant just call the Remove-Application.ps1 script and specify the ClientId.
+To remove the Application from your AAD Tenant just call the Remove-Application.ps1 script and specify the Web-Applications's ClientId and the Web-Api's ClientId.
+
+# Links
+https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-devhowto-multi-tenant-overview

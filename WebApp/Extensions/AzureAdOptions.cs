@@ -10,11 +10,11 @@
         
         public string Domain { get; set; }
         
-        public string TenantId { get; set; }
-        
         public string CallbackPath { get; set; }
 
         public string GraphApiUri { get; set; }
+
+        public string WebApiUri { get; set; }
 
         public string SignUpRequestUri { get; set; }
     }

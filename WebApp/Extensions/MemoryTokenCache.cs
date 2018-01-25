@@ -9,13 +9,17 @@ namespace Microsoft.AspNetCore.Authentication
         private static readonly object _syncRoot = new object();
         string _userObjectId = string.Empty;
         string _cacheId = string.Empty;
-        private IMemoryCache _cache; 
+        private static IMemoryCache _cache; 
+
+        static MemoryTokenCache()
+        {
+            _cache = new MemoryCache(new MemoryCacheOptions());
+        }
 
         public MemoryTokenCache(string userId)
         {
             _userObjectId = userId;
             _cacheId = _userObjectId + "_TokenCache";
-            _cache = new MemoryCache(new MemoryCacheOptions());
             this.AfterAccess = AfterAccessNotification;
             this.BeforeAccess = BeforeAccessNotification;
             Load();
