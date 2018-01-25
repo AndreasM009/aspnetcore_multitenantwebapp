@@ -20,6 +20,11 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add DbContextProvider
+            services.AddSingleton<Dal.ITenantDbContextProvider, Dal.SqliteTenantDbContextProvider>();
+            services.AddSingleton<Dal.ITenantRepository, Dal.TenantRepository>();
+            services.AddSingleton<Dal.IUserRepository, Dal.UserRepository>();
+
             services.AddAuthentication(sharedOptions =>
             {
                 sharedOptions.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;

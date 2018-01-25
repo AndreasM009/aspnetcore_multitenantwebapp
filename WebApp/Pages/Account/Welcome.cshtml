@@ -1,10 +1,20 @@
 @page
-@model Welcome
+@model Dal.Tenant
 @{
     ViewData["Title"] = "Welcome";
 }
 
 <h2>@ViewData["Title"]</h2>
-<p>
-    <a asp-controller="Account" asp-action="Signup" title="SignUp">SignUp</a>
-</p>
+<form asp-controller="AccountController" asp-action="SignUp">
+    <p>
+        <input asp-for="AdminConsented" />
+        <label>Consent for all users in directory</label>
+    </p>
+    <p>
+        <label>Your Tenant Name:</label>
+        <input asp-for="Name" asp-/>
+    </p>
+    <p>
+        <input type="submit" asp-controller="Account" asp-action="SignUp" />
+    </p>
+</form>

@@ -5,7 +5,9 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using WebApp.Dal;
 
 namespace Microsoft.AspNetCore.Authentication
 {
@@ -35,10 +37,14 @@ namespace Microsoft.AspNetCore.Authentication
         private class ConfigureAzureOptions : IConfigureNamedOptions<OpenIdConnectOptions>
         {
             private readonly AzureAdOptions _azureOptions;
+            private readonly ITenantRepository _tenantRepository;
+            private readonly IUserRepository _userRepository;
 
-            public ConfigureAzureOptions(IOptions<AzureAdOptions> azureOptions)
+            public ConfigureAzureOptions(IOptions<AzureAdOptions> azureOptions, ITenantRepository repository, IUserRepository userRepository)
             {
                 _azureOptions = azureOptions.Value;
+                _tenantRepository = repository;
+                _userRepository = userRepository;
             }
 
             public void Configure(string name, OpenIdConnectOptions options)
@@ -79,6 +85,19 @@ namespace Microsoft.AspNetCore.Authentication
 
                         // Notify the OIDC middleware that we already took care of code redemption.
                         context.HandleCodeRedemption(context.ProtocolMessage);
+                    },
+                    OnTokenValidated = async context =>
+                    {
+                        var upn = context.Principal.FindFirst(ClaimTypes.Name).Value;
+                        var tenantId = Guid.Parse(context.Principal.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value);
+                        var tenant = await _tenantRepository.GetByTenantId(tenantId);
+                        var user = await _userRepository.GetByUpnAndTenantId(upn, tenantId);
+
+                        // if the tenant was not onboarded, deny access
+                        if (null == tenant && null == user)
+                        {
+                            throw new SecurityTokenValidationException();
+                        }
                     }
                 };
             }
