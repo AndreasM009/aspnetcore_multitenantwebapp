@@ -31,6 +31,7 @@ $password = [System.Guid]::NewGuid().ToString()
 $webApiPassword = [System.Guid]::NewGuid().ToString();
 $webApplicaton = New-AzureRmADApplication -DisplayName $WebAppName -IdentifierUris $WebAppUri -AvailableToOtherTenants $true -ReplyUrls @("https://localhost:44377/signin-oidc", "https://localhost:44377/Account/ProcessSignUpCode")
 $webApi = New-AzureRmADApplication -DisplayName $WebApiName -IdentifierUris $WebApiUri -AvailableToOtherTenants $false -ReplyUrls "https://localhost:44355/signin-oidc"
+New-AzureRmADServicePrincipal -ApplicationId $webApi.ApplicationId -Password (ConvertTo-SecureString -String $webApiPassword -AsPlainText -Force)
 
 $webApplicationSecret = New-AzureRmADAppCredential -ApplicationId $webApplicaton.ApplicationId -Password (ConvertTo-SecureString -String $password -AsPlainText -Force)
 $webAppliSecret = New-AzureRmADAppCredential -ApplicationId $webApi.ApplicationId -Password (ConvertTo-SecureString -String $webApiPassword -AsPlainText -Force)
@@ -51,7 +52,7 @@ $webAppRequiredResourceAccess =@{requiredResourceAccess = @(
         })
     },
     @{
-        resourceAppId = "49956254-82f3-49a1-b247-0b0a10e08f73"
+        resourceAppId = $webApi.ApplicationId
         resourceAccess = @(
         @{
             id = "5dd66fad-4d2d-4e20-b1ea-251994040984"
@@ -107,5 +108,5 @@ return @{
     WebAppClientSecret = $password
     WebApiClientId = $webApi.ApplicationId
     WebApiClienSecret = $webApiPassword
-    WebApiUri = $WebAppUri
+    WebApiUri = $WebApiUri
 }
