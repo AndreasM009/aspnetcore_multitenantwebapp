@@ -77,7 +77,7 @@ namespace Microsoft.AspNetCore.Authentication
                     },
                     OnAuthorizationCodeReceived = async context =>
                     {
-                        // Acquire a Token for the Graph API and cache it using ADAL.  In the TodoListController, we'll use the cache to acquire a token to the Todo List API
+                        // Acquire a Token for the Graph API and cache it using ADAL.
                         string userId = (context.Principal.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier"))?.Value;
                         var clientCredentials = new ClientCredential(_azureOptions.ClientId, _azureOptions.ClientSecret);
                         var authContext = new AuthenticationContext("https://login.microsoftonline.com/common/", new MemoryTokenCache(userId));
